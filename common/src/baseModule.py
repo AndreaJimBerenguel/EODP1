@@ -52,6 +52,7 @@ class baseModule:
                             'File not found: ' + logstr)
 
         outlog = outdir + os.path.sep + modulestr + '.log'
+        outlog = outlog.replace("\\","/")
         logging.config.fileConfig(logstr,
                                   defaults={'logfilename': outlog})
         self.logger = logging.getLogger(self.modulestr)
