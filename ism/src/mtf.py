@@ -3,13 +3,14 @@ from config.ismConfig import ismConfig
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from scipy.special import j1
+#from scipy.special import j1
 from numpy.matlib import repmat
 from common.io.readMat import writeMat
 from common.plot.plotMat2D import plotMat2D
 from scipy.interpolate import interp2d
 from numpy.fft import fftshift, ifft2
 import os
+from scipy.special import j1
 
 class mtf:
     """
@@ -136,7 +137,7 @@ class mtf:
         """
         #TODO
         x=pi*defocus*fr2D*(1-fr2D)
-        Hdefoc=(2*j1(x))*x
+        Hdefoc=2*(j1(x))/x
 
         return Hdefoc
 
