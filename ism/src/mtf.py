@@ -104,11 +104,11 @@ class mtf:
         fnAct = fAct/(1/w)
 
         [fnAltxx, fnActxx] = np.meshgrid(fnAlt, fnAct, indexing='ij')
-        fn2D = np.sqrt(fnAltxx * fnAltxx + fnActxx * fnActxx)
+        fn2D = np.sqrt(fnAltxx * fnAltxx + fnActxx * fnActxx)   #normalized
 
-        f_co = D/(lambd*focal)
+        f_co = D/(lambd*focal)        #7.1.3.7. Cut-off frequency.
 
-        fr2D = fn2D * (1/w) / f_co
+        fr2D = fn2D * (1/w) / f_co      #7.1.3.8. Relative and normalised frequencies
 
 
         return fn2D, fr2D, fnAct, fnAlt
@@ -136,7 +136,7 @@ class mtf:
         :return: Defocus MTF
         """
         #TODO
-        x=pi*defocus*fr2D*(1-fr2D)
+        x=pi*defocus*fr2D*(1-fr2D)   #slide 51
         Hdefoc=2*(j1(x))/x
 
         return Hdefoc
@@ -154,7 +154,7 @@ class mtf:
         """
         #TODO
 
-        Hwfe=math.exp(-fr2D*(1-fr2D)*(kLF*(wLF/lambd)**2))   ###sin terminar
+        Hwfe=np.exp(-fr2D*(1-fr2D)*(kLF*(wLF/lambd)**2+kHF*(wHF/lambd)**2))   # slide 53
 
         return Hwfe
 
@@ -165,6 +165,9 @@ class mtf:
         :return: detector MTF
         """
         #TODO
+
+        Hdet = np.abs(np.sinc(fn2D))
+
         return Hdet
 
     def mtfSmearing(self, fnAlt, ncolumns, ksmear):
@@ -177,9 +180,10 @@ class mtf:
         """
         #TODO
 
+        Hsmear = np.zeros((len(fnAlt),ncolumns))
 
-
-        Hsmear = np.arcsin(ksmear*fnAlt)    #sin terminar
+        for column in range(ncolumns):
+            Hsmear[:,column] = np.sinc(ksmear*fnAlt)
 
         return Hsmear
 
@@ -191,6 +195,9 @@ class mtf:
         :return: detector MTF
         """
         #TODO
+
+        Hmotion = np.sinc(kmotion*fn2D)
+
         return Hmotion
 
     def plotMtf(self,Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band):
