@@ -2,7 +2,7 @@ from common.io.writeToa import readToa
 import numpy as np
 import matplotlib.pyplot as plt
 from config import globalConfig
-my_toa_path=r"C:\workbench\EODP-TS-L1B\00my_outputs-false"
+my_toa_path=r"C:\workbench\EODP-TS-L1B\00my_outputs"
 isrf_path=r"C:\workbench\EODP-TS-L1B\input"
 reference_toa_path=r"C:\workbench\EODP-TS-L1B\output"
 bands = ['VNIR-0','VNIR-1','VNIR-2','VNIR-3']
@@ -31,7 +31,7 @@ for band in bands:
     plt.ylabel('TOA [mW/m2/sr]')
     plt.title('Vector Plot')
 
-    plt.savefig('mytoa_vs_isrf_eq_false%s.png' % band)
+    plt.savefig('mytoa_vs_isrf%s.png' % band)
     plt.clf()
    # plt.show()
 
