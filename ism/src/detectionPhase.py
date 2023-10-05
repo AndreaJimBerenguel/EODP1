@@ -104,7 +104,15 @@ class detectionPhase(initIsm):
         :param wv: Central wavelength of the band [m]
         :return: Toa in photons
         """
+
         #TODO
+        #self.constants.h_planck
+        E_in= toa*area_pix*tint
+
+        E_ph=(self.constants.h_planck*self.constants.speed_light)/wv
+
+        toa_ph = E_in/1000/E_ph
+
         return toa_ph
 
     def phot2Electr(self, toa, QE):
@@ -115,6 +123,7 @@ class detectionPhase(initIsm):
         :return: toa in electrons
         """
         #TODO
+        toae=toa*QE
         return toae
 
     def badDeadPixels(self, toa,bad_pix,dead_pix,bad_pix_red,dead_pix_red):
@@ -128,6 +137,9 @@ class detectionPhase(initIsm):
         :return: toa in e- including bad & dead pixels
         """
         #TODO
+
+        toa[:, 5] = toa[:, 5] * (1 - bad_pix_red)
+
         return toa
 
     def prnu(self, toa, kprnu):
@@ -138,7 +150,20 @@ class detectionPhase(initIsm):
         :return: TOA after adding PRNU [e-]
         """
         #TODO
-        return toa
+        mu=0
+        sigma=1
+        #toa.shape[0] filas; toa.shape[1] columnas ??????????????
+
+        ###########no me estan yendo las variables
+
+        prnu=np.random.normal(mu,sigma,toa.shape[1])*kprnu
+
+        N_e = np.zeros((toa.shape[0],toa.shape[1]))
+
+        for columns in range(toa.shape[1]):
+            N_e[:, columns] = toa[:, columns] * (1 + prnu[columns])
+
+        return N_e
 
 
     def darkSignal(self, toa, kdsnu, T, Tref, ds_A_coeff, ds_B_coeff):
@@ -153,4 +178,19 @@ class detectionPhase(initIsm):
         :return: TOA in [e-] with dark signal
         """
         #TODO
-        return toa
+
+        mu = 0
+        sigma = 1
+
+        dsnu=np.abs(np.random.normal(mu,sigma,toa.shape[1])*kdsnu)
+
+        toa_output= np.zeros((toa.shape[0],toa.shape[1]))
+
+        s_d = ds_A_coeff*((T/Tref)**3) * np.exp(-ds_B_coeff*((1/T)-(1/Tref)))
+
+        DS = s_d*(1+dsnu)
+
+        for columns in range(toa.shape[1]):
+            toa_output[:, columns] = toa[:, columns] * DS[columns]
+
+        return toa_output
