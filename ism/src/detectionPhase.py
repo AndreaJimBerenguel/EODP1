@@ -162,7 +162,6 @@ class detectionPhase(initIsm):
 
         for columns in range(toa.shape[1]):
             N_e[:, columns] = toa[:, columns] * (1 + prnu[columns])
-
         return N_e
 
 

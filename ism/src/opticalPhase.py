@@ -93,7 +93,7 @@ class opticalPhase(initIsm):
         :return: TOA image in irradiances [mW/m2]
         """
         # TODO
-        toa=toa*Tr*(3.14/4)*(D/f)**2
+        toa=toa*Tr*(np.pi/4)*(D/f)**2
 
         return toa
 
@@ -132,7 +132,6 @@ class opticalPhase(initIsm):
                 cs = interp1d(sgm_wv, sgm_toa[ialt, iact, :], fill_value=(0, 0), bounds_error=False)
 
                 toa_interp = cs(isrf_wv)
-
 
                 result=toa_interp*isrf_normalized
                 toa[ialt,iact]=np.sum(result)
