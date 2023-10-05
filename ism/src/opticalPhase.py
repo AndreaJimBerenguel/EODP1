@@ -105,6 +105,10 @@ class opticalPhase(initIsm):
         :param Hsys: System MTF
         :return: TOA image in irradiances [mW/m2]
         """
+        GE = fft2(toa)
+
+        toa_ft= ifft2(GE * fftshift(Hsys))  #7.1.3.19.4. Apply the MTF
+        toa_ft=np.real(toa_ft)
         # TODO
         return toa_ft
 
