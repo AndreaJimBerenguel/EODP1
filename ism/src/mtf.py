@@ -76,6 +76,19 @@ class mtf:
         self.plotMtf(Hdiff, Hdefoc, Hwfe, Hdet, Hsmear, Hmotion, Hsys, nlines, ncolumns, fnAct, fnAlt, directory, band)
 
 
+        writeMat(self.outdir,'Hdiff_' + band, Hdiff)
+        writeMat(self.outdir, 'Hdefoc_' + band, Hdefoc)
+        writeMat(self.outdir, 'Hwfe_' + band, Hwfe)
+        writeMat(self.outdir, 'Hdet_' + band, Hdet)
+        writeMat(self.outdir, 'Hsmear_' + band, Hsmear)
+        writeMat(self.outdir, 'Hmotion_' + band, Hmotion)
+        '''
+        writeMat(self.outdir, 'fnAlt_' + band, fnAlt)
+        writeMat(self.outdir, 'fnAct_' + band, fnAct)
+        '''
+
+
+
         return Hsys
 
     def freq2d(self,nlines, ncolumns, D, lambd, focal, w):
