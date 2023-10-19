@@ -83,8 +83,8 @@ class mtf:
         writeMat(self.outdir, 'Hsmear_' + band, Hsmear)
         writeMat(self.outdir, 'Hmotion_' + band, Hmotion)
         '''
-        writeMat(self.outdir, 'fnAlt_' + band, fnAlt)
-        writeMat(self.outdir, 'fnAct_' + band, fnAct)
+        writeMat(self.outdir, 'ffr2D_' + band, fn2D)
+        writeMat(self.outdir, 'fr2D_' + band, fr2D)
         '''
 
 

@@ -9,8 +9,10 @@ from ism.src.ism import ism
 #outdir = r"C:\EODP\EODP_TER_2021_working\EODP-TS-ISM\myoutput"
 
 auxdir = r'C:\workbench\EODP\auxiliary'
-indir = r"C:\workbench\EODP-TS-ISM\input\gradient_alt100_act150"
-outdir = r"C:\workbench\EODP-TS-ISM\00my_outputs"
+
+
+indir = r"C:\workbench\EODP_TER_2021\EODP-TS-E2E\sgm_out"  ##r"C:\workbench\EODP-TS-ISM\input\gradient_alt100_act150"
+outdir = r"C:\workbench\EODP_TER_2021\EODP-TS-E2E\my_output_aux"  ##r"C:\workbench\EODP-TS-ISM\00my_outputs"
 
 # Initialise the ISM
 myIsm = ism(auxdir, indir, outdir)
