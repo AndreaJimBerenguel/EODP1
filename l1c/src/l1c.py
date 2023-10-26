@@ -4,7 +4,7 @@
 from l1c.src.initL1c import initL1c
 from common.io.writeToa import writeToa, readToa
 from common.io.readGeodetic import readGeodetic, getCorners
-import mgrs
+from mgrspy import mgrs
 import numpy as np
 from scipy.interpolate import bisplrep, bisplev
 import matplotlib.pyplot as plt
@@ -38,6 +38,7 @@ class l1c(initL1c):
             # -------------------------------------------------------------------------------
             writeL1c(self.outdir, self.globalConfig.l1c_toa + band, lat_l1c, lon_l1c, toa_l1c)
 
+            self.plotL1cToa(lat_l1c, lon_l1c, toa_l1c, band)
             self.logger.info("End of BAND " + band)
 
         self.logger.info("End of the L1C Module!")
@@ -63,6 +64,33 @@ class l1c(initL1c):
         :return: L1C radiances, L1C latitude and longitude in degrees
         '''
         #TODO
+        tck = bisplrep(lat, lon, toa)
+        #m = mgrs.MGRS()
+
+        mgrs_tiles = set([])  #sets only have unique values
+        #every 100m, we are going to obtain the mgrs point from each pixel. 2 pixel can have the same value of mgrs, that why we're using a set
+
+        #aux_mgrs = np.zeros(lat.shape[0],lat.shape[1])
+
+        for i in range(lat.shape[0]):
+            for j in range(lat.shape[1]):
+
+                mgrs_tiles.add(str(mgrs.toMgrs(lat[i,j],(lon[i,j]),self.l1cConfig.mgrs_tile_precision)))
+
+        list_mgrs_tiles = list(mgrs_tiles)  ## to iterate over the size of mgrs tiles
+
+        lat_l1c=np.zeros(len(list_mgrs_tiles))
+        lon_l1c=np.zeros(len(list_mgrs_tiles))
+        toa_l1c=np.zeros(len(list_mgrs_tiles))
+
+        for k in range(len(list_mgrs_tiles)):
+            #mgrs.toWgs(list_mgrs_tiles(k))
+            lat_l1c[k], lon_l1c[k] = mgrs.toWgs(list_mgrs_tiles[k])
+            toa_l1c[k] = bisplev(lat_l1c[k], lon_l1c[k],tck)
+
+        print(len(mgrs_tiles))  # sort our set and lucia's set to compare them
+
+        #plot the latitud and logitud
         return lat_l1c, lon_l1c, toa_l1c
 
     def checkSize(self, lat,toa):
@@ -74,3 +102,21 @@ class l1c(initL1c):
         :return: NA
         '''
         #TODO
+
+    def plotL1cToa(self, lat_l1c, lon_l1c, toa_l1c, band):
+        jet = cm.get_cmap('jet', len(lat_l1c))
+        toa_l1c[np.argwhere(toa_l1c < 0)] = 0
+        max_toa = np.max(toa_l1c)
+        # Plot stuff
+        fig = plt.figure(figsize=(20, 10))
+        clr = np.zeros(len(lat_l1c))
+        for ii in range(len(lat_l1c)):
+            clr = jet(toa_l1c[ii] / max_toa)
+            plt.plot(lon_l1c[ii], lat_l1c[ii], '.', color=clr, markersize=10)
+        plt.title('Projection on ground', fontsize=20)
+        plt.xlabel('Longitude [deg]', fontsize=16)
+        plt.ylabel('Latitude [deg]', fontsize=16)
+        plt.grid()
+        plt.axis('equal')
+        plt.savefig(self.outdir + 'toa_' + band + '.png')
+        plt.close(fig)
