@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from config import globalConfig
 
-my_toa_path=r'C:\workbench\EODP_TER_2021\EODP-TS-L1C\my_output'
-lucia_toa_path=r'C:\workbench\EODP_TER_2021\EODP-TS-L1C\output'
+my_toa_path=r'C:\workbench\EODP\EODP_TER_2021\EODP-TS-L1C\my_output'
+lucia_toa_path=r'C:\workbench\EODP\EODP_TER_2021\EODP-TS-L1C\output'
 
 bands = ['VNIR-0','VNIR-1','VNIR-2','VNIR-3']
 

@@ -1,46 +1,108 @@
 from common.io.writeToa import readToa
+from common.io.readMat import readMat
+from common.io.readArray import readArray
 import numpy as np
 import matplotlib.pyplot as plt
 from config import globalConfig
-my_toa_path=r"C:\workbench\EODP-TS-ISM\00my_outputs"
-ism_path=r"C:\workbench\EODP-TS-ISM\input"
-reference_toa_path=r"C:\workbench\EODP-TS-ISM\output"
+
+my_toa_path=r'C:\workbench\EODP\EODP_TER_2021\EODP-TS-ISM\00my_outputs'
+lucia_toa_path=r'C:\workbench\EODP\EODP_TER_2021\EODP-TS-ISM\output'
+figures=r'C:\workbench\EODP\EODP_TER_2021\EODP-TS-ISM\figures'
+
 bands = ['VNIR-0','VNIR-1','VNIR-2','VNIR-3']
-l1b_toa = 'l1b_toa_'
+
 ism_toa = 'ism_toa_isrf_'
 
+
 for band in bands:
-    my_toa_output = readToa(my_toa_path, l1b_toa + band + '.nc')
-    my_toa_input = readToa(ism_path, ism_toa + band + '.nc')
+    #read each output file
+    my_toa_output = readToa(my_toa_path, ism_toa + band + '.nc')
+    lucia_toa = readToa(lucia_toa_path, ism_toa + band + '.nc')
 
-    reference_toa = readToa(reference_toa_path, l1b_toa + band + '.nc')
-    result = reference_toa-my_toa_output
+    #difference between the outputs
+    result = lucia_toa-my_toa_output
 
-    difference=result/my_toa_output*100
+    mask = np.logical_or(np.isnan(my_toa_output), np.isnan(lucia_toa))
+    mask = np.logical_or(mask, my_toa_output == 0)
 
-    print(np.all(difference < 0.01))
+    # Handle cases where division is not possible
+    difference = np.zeros_like(result)
+    difference[~mask] = np.divide(result[~mask], my_toa_output[~mask], out=np.zeros_like(result[~mask]), where=my_toa_output[~mask]!=0) * 100
 
-    middle_row_mytoa=my_toa_output[len(my_toa_output) // 2]
-    middle_row_isrf = my_toa_input[len(my_toa_input) // 2]
+    #checking if the difference is lower than 0.01
+    checking_difference=np.array(difference < 0.01)
 
-    x = np.arange(150)
-    plt.plot(x, middle_row_mytoa, color='blue', label='Vector 1', linestyle='-')
-    plt.plot(x, middle_row_isrf, color='red', label='Vector 2', linestyle='-')
+    #sum the number of "TRUE" which are the values with a difference<0.01
+    sum_trues=sum(checking_difference)
 
-    plt.xlabel('ACT pixel [-]')
-    plt.ylabel('TOA [mW/m2/sr]')
-    plt.title('Vector Plot')
+    #checking if "difference<0.01" for at least 3-sigma
+    sigma3_checking=np.all(sum_trues >= 0.997*len(result))
 
-    plt.savefig('mytoa_vs_isrf%s.png' % band)
-    plt.clf()
-   # plt.show()
+    if(sigma3_checking== True):
+        print("yes, differences with output TOA (", ism_toa + band,") are <0.01% for at least 3-sigma of the points.")
+    else:
+        print("no, differences with output TOA (", ism_toa + band,") are not <0.01% for at least 3-sigma of the points.")
 
-    # plotear la linea central
-    #  For the central ALT position, plot the restored signal (l1b_toa), and the TOA after the ISRF
-    # (ism_toa_isrf). Explain the differences.
 
-    # Do another run of the L1B with the equalization enabled to false. Plot the restored signal for this case
-    # and for the case with the equalization set to True. Compare.
+
+
+    my_Hdiff = readMat(my_toa_path, 'Hdiff_' + band + '.nc')
+    my_Hdefoc = readMat(my_toa_path, 'Hdefoc_' + band + '.nc')
+    my_Hwfe = readMat(my_toa_path, 'Hwfe_' + band + '.nc')
+    my_Hdet = readMat(my_toa_path, 'Hdet_' + band + '.nc')
+    my_Hsmear = readMat(my_toa_path, 'Hsmear_' + band + '.nc')
+    my_Hmotion = readMat(my_toa_path, 'Hmotion_' + band + '.nc')
+#    my_Hsys = readMat(my_toa_path, 'Hsys_' + band + '.nc')
+    my_fnAct = readArray(my_toa_path, 'fnAct_' + band + '.nc')
+    my_fnAlt = readArray(my_toa_path, 'fnAlt_' + band + '.nc')
+
+    #fnAct: 1D normalised frequencies 2D ACT (f/(1/w))
+    nlines_ALT = my_Hdiff.shape[0]
+    ACT_central_line = int(nlines_ALT / 2)
+    nlines_ACT = my_Hdiff.shape[1]
+    ALT_central_line = int(nlines_ACT / 2)
+
+
+    # ACT
+    plt.plot(my_fnAct[75:150], my_Hdiff[ACT_central_line, 75:150])
+    plt.plot(my_fnAct[75:150], my_Hdefoc[ACT_central_line, 75:150])
+    plt.plot(my_fnAct[75:150], my_Hwfe[ACT_central_line, 75:150])
+    plt.plot(my_fnAct[75:150], my_Hdet[ACT_central_line, 75:150])
+    plt.plot(my_fnAct[75:150], my_Hsmear[ACT_central_line, 75:150])
+    plt.plot(my_fnAct[75:150], my_Hmotion[ACT_central_line, 75:150])
+    plt.plot(my_fnAct[75:150], my_Hsys[ACT_central_line, 75:150], color='black', linewidth=2.5)
+    plt.plot(np.full(2, 0.5), np.linspace(0, 1, 2), linestyle='--', color='black')
+    plt.xlabel('Spatial frequencies f/(1/w) [-]')
+    plt.ylabel('MTF')
+    plt.title("System MTF, slice ACT for " + band + " (for the central pixels of ALT)")
+    plt.legend(['Diffraction MTF', 'Defocus MTF', 'WFE Aberration MTF', 'Detector MTF', 'Smearing MTF', 'Motion blur MTF', 'System MTF','f Nyquist'])
+    plt.xlim(-0.025, 0.525)
+    plt.ylim(-0.025, 1.025)
+    plt.savefig("ism_plot_MTF_ACT_" + band + ".png")
+    plt.show()
+
+
+    # ALT
+    plt.plot(my_fnAlt[50:100], my_Hdiff[50:100, ALT_central_line])
+    plt.plot(my_fnAlt[50:100], my_Hdefoc[50:100, ALT_central_line])
+    plt.plot(my_fnAlt[50:100], my_Hwfe[50:100, ALT_central_line])
+    plt.plot(my_fnAlt[50:100], my_Hdet[50:100, ALT_central_line])
+    plt.plot(my_fnAlt[50:100], my_Hsmear[50:100, ALT_central_line])
+    plt.plot(my_fnAlt[50:100], my_Hmotion[50:100, ALT_central_line])
+    plt.plot(my_fnAlt[50:100], my_Hsys[50:100, ALT_central_line], color='black', linewidth=2.5)
+    plt.plot(np.full(2, 0.5), np.linspace(0, 1, 2), linestyle='--', color='black')
+    plt.xlabel('Spatial frequencies f/(1/w) [-]')
+    plt.ylabel('MTF')
+    plt.title("System MTF, slice ALT for " + band + " (for the central pixels of ACT)")
+    plt.legend(
+        ['Diffraction MTF', 'Defocus MTF', 'WFE Aberration MTF', 'Detector MTF', 'Smearing MTF', 'Motion blur MTF',
+         'System MTF', 'f Nyquist'])
+    plt.xlim(-0.025, 0.525)
+    plt.ylim(-0.025, 1.025)
+    plt.savefig(figures+"ism_plot_MTF_ALT_" + band + ".png")
+    plt.show()
+
+
 
 
 

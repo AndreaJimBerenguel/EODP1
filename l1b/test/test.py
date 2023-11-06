@@ -2,9 +2,9 @@ from common.io.writeToa import readToa
 import numpy as np
 import matplotlib.pyplot as plt
 from config import globalConfig
-my_toa_path=r"C:\workbench\EODP-TS-L1B\00my_outputs"
-isrf_path=r"C:\workbench\EODP-TS-L1B\input"
-reference_toa_path=r"C:\workbench\EODP-TS-L1B\output"
+my_toa_path=r"C:\workbench\EODP\EODP_TER_2021\EODP-TS-L1B\00my_outputs"
+isrf_path=r"C:\workbench\EODP\EODP_TER_2021\EODP-TS-L1B\input"
+reference_toa_path=r"C:\workbench\EODP\EODP_TER_2021\EODP-TS-L1B\output"
 bands = ['VNIR-0','VNIR-1','VNIR-2','VNIR-3']
 l1b_toa = 'l1b_toa_'
 ism_toa = 'ism_toa_isrf_'
